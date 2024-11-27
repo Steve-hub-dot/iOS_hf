@@ -10,7 +10,8 @@ import CoreData
 
 struct TravelListView: View {
     @Environment(\.managedObjectContext) private var viewContext
-
+    @State private var selectedItemID: NSManagedObjectID?
+    
     @FetchRequest(
         sortDescriptors: [NSSortDescriptor(keyPath: \Item.date, ascending: true)],
         animation: .default)
@@ -20,11 +21,13 @@ struct TravelListView: View {
         NavigationView {
             List {
                 ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.name!)")
-                    } label: {
-                        Text(item.name!)
-                    }
+                    NavigationLink(
+                        destination: Text("Item at \(item.name ?? "Unknown")")) {
+                            Text(item.name ?? "Unnamed Item")
+                            .onTapGesture {
+                                selectedItemID = item.objectID
+                            }
+                        }
                 }
                 .onDelete(perform: deleteItems)
             }
@@ -35,8 +38,10 @@ struct TravelListView: View {
                 }
 #endif
                 ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
+                    HStack{
+                        Button(action: addItem) {
+                            Label("Add Item", systemImage: "plus")
+                        }
                     }
                 }
             }
@@ -48,7 +53,7 @@ struct TravelListView: View {
         withAnimation {
             let newItem = Item(context: viewContext)
             newItem.date = Date()
-            newItem.descr = "about"
+            newItem.details = "about"
             newItem.distance = 0.1
             newItem.location = "nowhere"
             newItem.name = "asd"
@@ -64,6 +69,7 @@ struct TravelListView: View {
         }
     }
 
+    
     private func deleteItems(offsets: IndexSet) {
         withAnimation {
             offsets.map { items[$0] }.forEach(viewContext.delete)

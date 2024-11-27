@@ -13,7 +13,7 @@ struct iOS_hfApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            TravelListView()
                 .environment(\.managedObjectContext, persistenceController.container.viewContext)
         }
     }
